@@ -64,8 +64,49 @@ ais_data['heading_change'].fillna(0, inplace=True)
 
 print("Feature engineering completed. Here's the head of the DataFrame:\n", ais_data.head(5))
 
-print(ais_data[['vesselId', 'time', 'latitude', 'longitude']].head(20))
+
+
+# Define the prediction horizon: shift by 3 rows (to predict 1 hour ahead if data is recorded every 20 minutes)
+prediction_horizon = 3
+
+ #Shift latitude and longitude to create future target values for each vessel
+ais_data['latitude_future'] = ais_data.groupby('vesselId')['latitude'].shift(-prediction_horizon)
+ais_data['longitude_future'] = ais_data.groupby('vesselId')['longitude'].shift(-prediction_horizon)
+
+# Fill NaNs in latitude_future and longitude_future using the last known value (forward fill)
+ais_data['latitude_future'].fillna(method='ffill', inplace=True)
+ais_data['longitude_future'].fillna(method='ffill', inplace=True)
+
+# Display the updated DataFrame to verify the new target columns
+print("DataFrame after target engineering:\n", ais_data[['vesselId', 'time', 'latitude', 'longitude', 'latitude_future', 'longitude_future']].head(20))
+
+
 print("Columns in the dataset:\n", ais_data.columns)
+
+
+'''
+Summary of the Code Steps
+Import Libraries
+Load the Dataset
+Clean Column Names
+Convert time Column to Datetime
+Extract Time-Based Features (hour, day_of_week, month)
+Sort Data by vesselId and time
+Define Distance Calculation Function
+Initialize distance_traveled Column
+Calculate Distance Traveled for Each Vessel
+Calculate Time Difference (time_diff)
+Calculate Speed (speed)
+Calculate Heading Change (heading_change)
+Fill NaNs in Relevant Columns with Zero
+Define Prediction Horizon and Shift for Target Engineering
+Fill NaNs in Target Columns (latitude_future, longitude_future) with Forward Fill
+
+
+
+'''
+
+
 
 
 
